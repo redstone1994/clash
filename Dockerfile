@@ -12,7 +12,11 @@ RUN go mod download && \
 FROM alpine:latest
 LABEL org.opencontainers.image.source="https://github.com/Dreamacro/clash"
 
-RUN apk add --no-cache ca-certificates tzdata
+RUN apk add --no-cache ca-certificates tzdata iptables
+RUN echo "net.ipv4.ip_forward=1" > /etc/sysctl.conf && sysctl -p /etc/sysctl.conf
 COPY --from=builder /Country.mmdb /root/.config/clash/
 COPY --from=builder /clash /
+COPY iptables.sh /iptables.sh
+CMD ["sh","/iptables.sh"]
+
 ENTRYPOINT ["/clash"]
