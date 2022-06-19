@@ -10,7 +10,7 @@ ip rule add fwmark 1 table 100
 ip route add local 0.0.0.0/0 dev lo table 100
 
 # CREATE TABLE
-iptables -t mangle -N clash
+# iptables -t mangle -N clash
 
 # RETURN LOCAL AND LANS
 iptables -t mangle -A clash -d 0.0.0.0/8 -j RETURN
