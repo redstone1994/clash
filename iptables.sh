@@ -61,8 +61,8 @@ iptables -t mangle -A clash_local -p tcp -j MARK --set-mark 666
 iptables -t mangle -A clash_local -p udp -j MARK --set-mark 666
 
 # 跳过 clash 程序本身发出的流量, 防止死循环(clash 程序需要使用 "clash" 用户启动)
-iptables -t mangle -A OUTPUT -p tcp -m owner --uid-owner clash -j RETURN
-iptables -t mangle -A OUTPUT -p udp -m owner --uid-owner clash -j RETURN
+# iptables -t mangle -A OUTPUT -p tcp -m owner --uid-owner clash -j RETURN
+# iptables -t mangle -A OUTPUT -p udp -m owner --uid-owner clash -j RETURN
 
 # 让本机发出的流量跳转到 clash_local
 # clash_local 链会为本机流量打 mark, 打过 mark 的流量会重新回到 PREROUTING 上
