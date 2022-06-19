@@ -18,4 +18,4 @@ COPY --from=builder /Country.mmdb /root/.config/clash/
 COPY --from=builder /clash /
 COPY iptables.sh /iptables.sh
 
-ENTRYPOINT ["sh", "/iptables.sh","/clash"]
+ENTRYPOINT ["sh", "/iptables.sh"]
