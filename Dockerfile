@@ -20,8 +20,8 @@ RUN set -o errexit -o nounset \
     && chown -R clash:clash /home/clash
 USER clash
 
-COPY --from=builder /Country.mmdb /clash/.config/clash/
+COPY --from=builder /Country.mmdb /home/clash/.config/clash/
 COPY --from=builder /clash /home/clash/
-COPY iptables.sh /iptables.sh
-RUN chmod +x iptables.sh
+#COPY iptables.sh /iptables.sh
+#RUN chmod +x iptables.sh
 ENTRYPOINT ["/home/clash/clash"]
