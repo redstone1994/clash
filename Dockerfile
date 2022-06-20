@@ -16,8 +16,7 @@ RUN apk add --no-cache ca-certificates tzdata iptables
 RUN set -o errexit -o nounset \
     && echo "Adding clash user and group" \
     && addgroup --system --gid 1000 clash \
-    && adduser --system --ingroup clash --uid 1000 --shell /bin/ash clash \
-    && chown -R clash:clash /home/clash
+    && adduser --system --ingroup clash --uid 1000 --shell /bin/sh clash
 USER clash
 
 COPY --from=builder /Country.mmdb /home/clash/.config/clash/
