@@ -26,4 +26,5 @@ iptables -t nat -A CLASH_DNS -p udp -j REDIRECT --to-port 1053
 iptables -t nat -I OUTPUT -p udp --dport 53 -j CLASH_DNS
 iptables -t nat -I PREROUTING -p udp --dport 53 -j REDIRECT --to 1053
 
-/clash
+su clash && /home/clash/clash
+
