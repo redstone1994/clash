@@ -18,4 +18,15 @@ COPY --from=builder /Country.mmdb /root/.config/clash/
 COPY --from=builder /clash /
 COPY iptables.sh /iptables.sh
 RUN chmod +x iptables.sh
-ENTRYPOINT ["sh", "iptables.sh"]
+RUN sh iptables.sh
+RUN set -o errexit -o nounset \
+    && echo "Adding gradle user and group" \
+    && addgroup --system --gid 1000 clash \
+    && adduser --system --ingroup clash --uid 1000 --shell /bin/ash clash \
+    && mkdir /home/clash/.clash \
+    && cp /clash /home/clash/clash \
+    && chown -R clash:clash /home/clash \
+    \
+    && echo "Symlinking root Gradle cache to gradle Gradle cache" \
+    && ln -s /home/clash/.clash /root/.clash
+ENTRYPOINT ["/home/clash/clash"]
