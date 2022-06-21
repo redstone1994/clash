@@ -19,7 +19,7 @@ iptables -t nat -A clash -p tcp -j REDIRECT --to-port 7893
 iptables -t nat -I PREROUTING -p tcp -d 8.8.8.8 -j REDIRECT --to-port 7893
 iptables -t nat -I PREROUTING -p tcp -d 8.8.4.4 -j REDIRECT --to-port 7893
 iptables -t nat -A PREROUTING -p tcp -j clash
-iptables -t nat -A OUTPUT -p tcp -d 172.17.0.0/16 -j REDIRECT --to-port 7893
+iptables -t nat -A OUTPUT -p tcp -d 198.18.0.0/16 -j REDIRECT --to-port 7893
 iptables -t nat -N CLASH_DNS
 iptables -t nat -F CLASH_DNS 
 iptables -t nat -A CLASH_DNS -p udp -j REDIRECT --to-port 1053
