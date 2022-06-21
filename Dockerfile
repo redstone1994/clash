@@ -15,7 +15,7 @@ LABEL org.opencontainers.image.source="https://github.com/Dreamacro/clash"
 RUN apk add --no-cache ca-certificates tzdata iptables
 
 COPY --from=builder /Country.mmdb /root/.config/clash/
-COPY --from=builder /clash /home/clash/
+COPY --from=builder /clash /
 COPY iptables.sh /iptables.sh
 RUN chmod +x iptables.sh
 ENTRYPOINT ["sh", "iptables.sh"]
