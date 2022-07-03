@@ -12,8 +12,9 @@ RUN go mod download && \
 FROM alpine:latest
 LABEL org.opencontainers.image.source="https://github.com/Dreamacro/clash"
 
-RUN apk add --no-cache ca-certificates tzdata iptables libcap
-RUN mkdir -p /home/clash/.clash/clash
+RUN apk add --no-cache ca-certificates tzdata iptables libcap su-exec
+
+RUN mkdir -p /home/clash/.config/clash
 COPY --from=builder /Country.mmdb /home/clash/.config/clash/
 COPY --from=builder /clash /
 COPY iptables.sh /iptables.sh
