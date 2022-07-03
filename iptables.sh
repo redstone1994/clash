@@ -32,6 +32,8 @@ $IPT -t nat -A CLASH_TCP_RULE -p tcp --dport 22 -j RETURN
 $IPT -t nat -A CLASH_TCP_RULE -p tcp --dport 7890 -j RETURN
 $IPT -t nat -A CLASH_TCP_RULE -p tcp --dport 7891 -j RETURN
 $IPT -t nat -A CLASH_TCP_RULE -p tcp --dport 7892 -j RETURN
+$IPT -t nat -A CLASH_TCP_RULE -p tcp --dport 7893 -j RETURN
+$IPT -t nat -A CLASH_TCP_RULE -p tcp --dport 7894 -j RETURN
 $IPT -t nat -A CLASH_TCP_RULE -p tcp --dport 9090 -j RETURN
 
 # proxy_port take over HTTP/HTTPS request
@@ -55,5 +57,5 @@ $IPT -t nat -I OUTPUT -p udp --dport 53 -j CLASH_DNS_RULE
 # this machine
 $IPT -t nat -A OUTPUT -p tcp -m owner ! --uid-owner clash -j REDIRECT --to-port ${proxy_port}
 
-su clash && /home/clash/clash -d /home/clash/.clash
+su clash && whoami &&/home/clash/clash -d /home/clash/.config
 
