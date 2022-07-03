@@ -55,5 +55,5 @@ $IPT -t nat -I OUTPUT -p udp --dport 53 -j CLASH_DNS_RULE
 # this machine
 $IPT -t nat -A OUTPUT -p tcp -m owner ! --uid-owner clash -j REDIRECT --to-port ${proxy_port}
 
-
+gosu clash && /home/clash/clash -d /home/clash/.clash
 

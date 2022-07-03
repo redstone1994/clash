@@ -30,4 +30,3 @@ RUN set -o errexit -o nounset \
 
 ENTRYPOINT ["sh", "iptables.sh"]
 
-CMD ["exec","gosu","/home/clash/clash","-d","/home/clash/.clash"]
