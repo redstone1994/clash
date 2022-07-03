@@ -5,26 +5,55 @@ set -ex
 # ENABLE ipv4 forward
 sysctl -w net.ipv4.ip_forward=1
 
-iptables -t nat -N clash
-iptables -t nat -A clash -d 0.0.0.0/8 -j RETURN
-iptables -t nat -A clash -d 10.0.0.0/8 -j RETURN
-iptables -t nat -A clash -d 127.0.0.0/8 -j RETURN
-iptables -t nat -A clash -d 169.254.0.0/16 -j RETURN
-iptables -t nat -A clash -d 172.16.0.0/12 -j RETURN
-iptables -t nat -A clash -d 192.168.0.0/16 -j RETURN
-iptables -t nat -A clash -d 224.0.0.0/4 -j RETURN
-iptables -t nat -A clash -d 240.0.0.0/4 -j RETURN
-iptables -t nat -A clash -d 172.17.0.2 -j RETURN
-iptables -t nat -A clash -p tcp -j REDIRECT --to-port 7893
-iptables -t nat -I PREROUTING -p tcp -d 8.8.8.8 -j REDIRECT --to-port 7893
-iptables -t nat -I PREROUTING -p tcp -d 8.8.4.4 -j REDIRECT --to-port 7893
-iptables -t nat -A PREROUTING -p tcp -j clash
-iptables -t nat -A OUTPUT -p tcp -d 198.18.0.0/16 -j REDIRECT --to-port 7893
-iptables -t nat -N CLASH_DNS
-iptables -t nat -F CLASH_DNS 
-iptables -t nat -A CLASH_DNS -p udp -j REDIRECT --to-port 1053
-iptables -t nat -I OUTPUT -p udp --dport 53 -j CLASH_DNS
-iptables -t nat -I PREROUTING -p udp --dport 53 -j REDIRECT --to 1053
+IPT=/sbin/iptables
+lan_ipaddr=$(/sbin/ip route | awk '/default/ { print $3 }')
+dns_port="1053"
+proxy_port="7894"
 
-su clash && /home/clash/clash
+# remove any existing rules
+$IPT -F
+
+# create new nat rule
+$IPT -t nat -N CLASH_TCP_RULE
+$IPT -t nat -F CLASH_TCP_RULE
+
+# do not forward local address
+$IPT -t nat -A CLASH_TCP_RULE -d 10.0.0.0/8 -j RETURN
+$IPT -t nat -A CLASH_TCP_RULE -d 127.0.0.0/8 -j RETURN
+$IPT -t nat -A CLASH_TCP_RULE -d 169.254.0.0/16 -j RETURN
+$IPT -t nat -A CLASH_TCP_RULE -d 172.16.0.0/12 -j RETURN
+$IPT -t nat -A CLASH_TCP_RULE -d 192.168.0.0/16 -j RETURN
+$IPT -t nat -A CLASH_TCP_RULE -d 224.0.0.0/4 -j RETURN
+$IPT -t nat -A CLASH_TCP_RULE -d 240.0.0.0/4 -j RETURN
+$IPT -t nat -A CLASH_TCP_RULE -d ${lan_ipaddr}/16 -j RETURN
+
+# do not forward ssh, clash http socks ports, transparent proxy port, clash web API port
+$IPT -t nat -A CLASH_TCP_RULE -p tcp --dport 22 -j RETURN
+$IPT -t nat -A CLASH_TCP_RULE -p tcp --dport 7890 -j RETURN
+$IPT -t nat -A CLASH_TCP_RULE -p tcp --dport 7891 -j RETURN
+$IPT -t nat -A CLASH_TCP_RULE -p tcp --dport 7892 -j RETURN
+$IPT -t nat -A CLASH_TCP_RULE -p tcp --dport 9090 -j RETURN
+
+# proxy_port take over HTTP/HTTPS request
+$IPT -t nat -A CLASH_TCP_RULE  -p tcp -j REDIRECT --to-ports ${proxy_port}
+
+# forward freedom DNS server address
+$IPT -t nat -I PREROUTING -p tcp -d 8.8.8.8 -j REDIRECT --to-port "$proxy_port"
+$IPT -t nat -I PREROUTING -p tcp -d 8.8.4.4 -j REDIRECT --to-port "$proxy_port"
+$IPT -t nat -A PREROUTING -p tcp  -j CLASH_TCP_RULE
+# Fake-IP rule
+# $IPT -t nat -A OUTPUT -p tcp -d 198.18.0.0/16 -j REDIRECT --to-port ${proxy_port}
+
+# forward DNS request to dns_port
+$IPT -t nat -N CLASH_DNS_RULE
+$IPT -t nat -F CLASH_DNS_RULE
+
+$IPT -t nat -A PREROUTING -p udp -s ${lan_ipaddr}/16 --dport 53 -j CLASH_DNS_RULE
+$IPT -t nat -A CLASH_DNS_RULE -p udp -s ${lan_ipaddr}/16 --dport 53 -j REDIRECT --to-ports $dns_port
+$IPT -t nat -I OUTPUT -p udp --dport 53 -j CLASH_DNS_RULE
+
+# this machine
+$IPT -t nat -A OUTPUT -p tcp -m owner ! --uid-owner clash -j REDIRECT --to-port ${proxy_port}
+
+
 

@@ -12,11 +12,13 @@ RUN go mod download && \
 FROM alpine:latest
 LABEL org.opencontainers.image.source="https://github.com/Dreamacro/clash"
 
-RUN apk add --no-cache ca-certificates tzdata iptables
+RUN apk add --no-cache ca-certificates tzdata iptables libcap
 
 COPY --from=builder /Country.mmdb /root/.config/clash/
 COPY --from=builder /clash /
 COPY iptables.sh /iptables.sh
+RUN setcap cap_net_bind_service=+eip /clash
+
 RUN chmod +x iptables.sh
 
 RUN set -o errexit -o nounset \
@@ -24,9 +26,9 @@ RUN set -o errexit -o nounset \
     && addgroup --system --gid 1000 clash \
     && adduser --system --ingroup clash --uid 1000 --shell /bin/ash clash \
     && mkdir /home/clash/.clash \
-    && cp /clash /home/clash/clash \
+    && mv /clash /home/clash/clash \
     && chown -R clash:clash /home/clash
-#     \
-#     && echo "Symlinking root Gradle cache to gradle Gradle cache" \
-#     && ln -s /home/clash/.clash /root/.clash
+
 ENTRYPOINT ["sh", "iptables.sh"]
+
+CMD ["exec","gosu","/home/clash/clash","-d","/home/clash/.clash"]
