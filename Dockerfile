@@ -13,7 +13,7 @@ FROM alpine:latest
 LABEL org.opencontainers.image.source="https://github.com/Dreamacro/clash"
 
 RUN apk add --no-cache ca-certificates tzdata iptables libcap
-
+RUN mkdir -p /home/clash/.clash/clash
 COPY --from=builder /Country.mmdb /home/clash/.config/clash/
 COPY --from=builder /clash /
 COPY iptables.sh /iptables.sh
@@ -25,7 +25,6 @@ RUN set -o errexit -o nounset \
     && echo "Adding gradle user and group" \
     && addgroup --system --gid 1000 clash \
     && adduser --system --ingroup clash --uid 1000 --shell /bin/ash clash \
-    && mkdir /home/clash/.clash/clash \
     && mv /clash /home/clash/clash \
     && chown -R clash:clash /home/clash
 
