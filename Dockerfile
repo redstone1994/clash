@@ -18,7 +18,7 @@ RUN mkdir -p /home/clash/.config/clash
 COPY --from=builder /Country.mmdb /home/clash/.config/clash/
 COPY --from=builder /clash /
 COPY iptables.sh /iptables.sh
-RUN setcap cap_net_bind_service=+eip /clash
+
 
 RUN chmod +x iptables.sh
 
@@ -28,6 +28,7 @@ RUN set -o errexit -o nounset \
     && adduser --system --ingroup clash --uid 1000 --shell /bin/ash clash \
     && mv /clash /home/clash/clash \
     && chown -R clash:clash /home/clash
+RUN setcap 'cap_net_admin,cap_net_bind_service=+ep' /home/clash/clash
 
 ENTRYPOINT ["sh", "iptables.sh"]
 
